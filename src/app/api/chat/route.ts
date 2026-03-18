@@ -6,9 +6,9 @@ type ChatMessage = {
 };
 
 type InterviewQuestion = {
-  question: string;
-  intent: string;
-  answerHint: string;
+  question?: string;
+  intent?: string;
+  answerHint?: string;
 };
 
 type AnalysisResult = {
@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
+    const modelName =
+      process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct";
 
     if (!apiKey) {
       return NextResponse.json(
@@ -57,35 +59,43 @@ ${jobDescription.trim()}
     }
 
     if (analysisResult) {
-      const keywords = analysisResult.jobKeywords?.length
-        ? analysisResult.jobKeywords.join("、")
-        : "暂无";
+      const keywords =
+        analysisResult.jobKeywords && analysisResult.jobKeywords.length > 0
+          ? analysisResult.jobKeywords.join("、")
+          : "暂无";
 
       const matchScore =
         typeof analysisResult.matchScore === "number"
           ? `${analysisResult.matchScore}/100`
           : "暂无";
 
-      const gapAnalysis = analysisResult.gapAnalysis?.length
-        ? analysisResult.gapAnalysis
-            .map((item, index) => `${index + 1}. ${item}`)
-            .join("\n")
-        : "暂无";
+      const gapAnalysis =
+        analysisResult.gapAnalysis && analysisResult.gapAnalysis.length > 0
+          ? analysisResult.gapAnalysis
+              .map((item, index) => `${index + 1}. ${item}`)
+              .join("\n")
+          : "暂无";
 
-      const improvedBullets = analysisResult.improvedBullets?.length
-        ? analysisResult.improvedBullets
-            .map((item, index) => `${index + 1}. ${item}`)
-            .join("\n")
-        : "暂无";
+      const improvedBullets =
+        analysisResult.improvedBullets &&
+        analysisResult.improvedBullets.length > 0
+          ? analysisResult.improvedBullets
+              .map((item, index) => `${index + 1}. ${item}`)
+              .join("\n")
+          : "暂无";
 
-      const interviewQuestions = analysisResult.interviewQuestions?.length
-        ? analysisResult.interviewQuestions
-            .map(
-              (item, index) =>
-                `${index + 1}. 问题：${item.question}\n   考察意图：${item.intent}\n   回答提示：${item.answerHint}`
-            )
-            .join("\n")
-        : "暂无";
+      const interviewQuestions =
+        analysisResult.interviewQuestions &&
+        analysisResult.interviewQuestions.length > 0
+          ? analysisResult.interviewQuestions
+              .map(
+                (item, index) =>
+                  `${index + 1}. 问题：${item.question || ""}\n   考察意图：${
+                    item.intent || ""
+                  }\n   回答提示：${item.answerHint || ""}`
+              )
+              .join("\n")
+          : "暂无";
 
       contextParts.push(
         `
@@ -252,7 +262,7 @@ ${contextBlock}
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "meta-llama/llama-3.1-8b-instruct",
+          model: modelName,
           messages: finalMessages,
           temperature: 0.5,
         }),
@@ -262,7 +272,7 @@ ${contextBlock}
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("OpenRouter API Error:", data);
+      console.error("OpenRouter Chat API Error:", data);
       return NextResponse.json(
         {
           error: data?.error?.message || "OpenRouter 调用失败",
@@ -278,6 +288,9 @@ ${contextBlock}
     return NextResponse.json({ reply });
   } catch (error) {
     console.error("Chat API Error:", error);
-    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
+    return NextResponse.json(
+      { error: "服务器内部错误" },
+      { status: 500 }
+    );
   }
 }

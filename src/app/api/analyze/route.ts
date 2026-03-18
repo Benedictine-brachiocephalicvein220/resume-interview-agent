@@ -1,16 +1,4 @@
-import OpenAI from "openai";
-import { NextResponse } from "next/server";
-
-const apiKey = process.env.OPENROUTER_API_KEY;
-
-const client = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey,
-  defaultHeaders: {
-    "HTTP-Referer": "http://localhost:3000",
-    "X-OpenRouter-Title": "Resume Interview Agent",
-  },
-});
+import { NextRequest, NextResponse } from "next/server";
 
 type InterviewQuestion = {
   question: string;
@@ -18,7 +6,7 @@ type InterviewQuestion = {
   answerHint: string;
 };
 
-type AnalysisResult = {
+type AnalyzeResult = {
   jobKeywords: string[];
   matchScore: number;
   gapAnalysis: string[];
@@ -26,145 +14,166 @@ type AnalysisResult = {
   interviewQuestions: InterviewQuestion[];
 };
 
-function extractJson(text: string) {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) {
-    return null;
+function extractJson(text: string): string {
+  const codeBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/i);
+  if (codeBlockMatch?.[1]) {
+    return codeBlockMatch[1].trim();
   }
-  return text.slice(start, end + 1);
+
+  const firstBrace = text.indexOf("{");
+  const lastBrace = text.lastIndexOf("}");
+
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    return text.slice(firstBrace, lastBrace + 1);
+  }
+
+  return text;
 }
 
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
-
-function isValidResult(data: unknown): data is AnalysisResult {
-  if (!data || typeof data !== "object") return false;
-
-  const obj = data as Record<string, unknown>;
-
-  return (
-    isStringArray(obj.jobKeywords) &&
-    typeof obj.matchScore === "number" &&
-    isStringArray(obj.gapAnalysis) &&
-    isStringArray(obj.improvedBullets) &&
-    Array.isArray(obj.interviewQuestions)
-  );
-}
-
-export async function POST(req: Request) {
+function safeParseAnalyzeResult(rawText: string): AnalyzeResult {
   try {
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "OPENROUTER_API_KEY is missing." },
-        { status: 500 }
-      );
-    }
+    const jsonText = extractJson(rawText);
+    const parsed = JSON.parse(jsonText);
 
+    return {
+      jobKeywords: Array.isArray(parsed.jobKeywords)
+        ? parsed.jobKeywords.map(String)
+        : [],
+      matchScore:
+        typeof parsed.matchScore === "number"
+          ? parsed.matchScore
+          : Number(parsed.matchScore) || 0,
+      gapAnalysis: Array.isArray(parsed.gapAnalysis)
+        ? parsed.gapAnalysis.map(String)
+        : [],
+      improvedBullets: Array.isArray(parsed.improvedBullets)
+        ? parsed.improvedBullets.map(String)
+        : [],
+      interviewQuestions: Array.isArray(parsed.interviewQuestions)
+        ? parsed.interviewQuestions.map((item: unknown) => {
+            const obj = item as Partial<InterviewQuestion>;
+            return {
+              question: String(obj.question || ""),
+              intent: String(obj.intent || ""),
+              answerHint: String(obj.answerHint || ""),
+            };
+          })
+        : [],
+    };
+  } catch {
+    return {
+      jobKeywords: [],
+      matchScore: 0,
+      gapAnalysis: ["模型返回结果解析失败，请重试。"],
+      improvedBullets: [],
+      interviewQuestions: [],
+    };
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
     const body = await req.json();
-    const { jobDescription } = body;
+    const jobDescription = body.jobDescription as string | undefined;
 
     if (!jobDescription || !jobDescription.trim()) {
       return NextResponse.json(
-        { error: "Job description is required." },
+        { error: "jobDescription 不能为空" },
         { status: 400 }
       );
     }
 
-    const completion = await client.chat.completions.create({
-      model: "meta-llama/llama-3.1-8b-instruct",
-      temperature: 0.2,
-      max_tokens: 350,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a professional resume and interview assistant. Return JSON only.",
-        },
-        {
-          role: "user",
-          content: `
-Return ONLY valid JSON in this exact shape:
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    const modelName =
+      process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct";
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "服务端缺少 OPENROUTER_API_KEY" },
+        { status: 500 }
+      );
+    }
+
+    const messages = [
+      {
+        role: "system",
+        content: `
+你是一个专业的中文求职分析助手，专门帮助大学生、校招生和实习生分析岗位 JD，并输出结构化结果。
+
+你的任务：
+根据用户输入的岗位 JD，返回严格 JSON，字段如下：
+
 {
-  "jobKeywords": string[],
-  "matchScore": number,
-  "gapAnalysis": string[],
-  "improvedBullets": string[],
+  "jobKeywords": ["关键词1", "关键词2"],
+  "matchScore": 0,
+  "gapAnalysis": ["差距1", "差距2"],
+  "improvedBullets": ["优化后的简历 bullet 1", "优化后的简历 bullet 2"],
   "interviewQuestions": [
     {
-      "question": string,
-      "intent": string,
-      "answerHint": string
+      "question": "面试问题",
+      "intent": "考察意图",
+      "answerHint": "回答提示"
     }
   ]
 }
 
-Rules:
-- matchScore must be 0 to 100
-- jobKeywords: 5 items
-- gapAnalysis: 3 items
-- improvedBullets: 3 items
-- interviewQuestions: 3 items
-- No markdown
-- No extra explanation
+要求：
+1. 必须只返回 JSON，不要添加额外解释。
+2. 默认使用中文。
+3. jobKeywords：提取 5-10 个岗位核心关键词。
+4. matchScore：返回 0-100 的整数分数，表示候选人与岗位的大致匹配度。
+5. gapAnalysis：输出 3-5 条候选人可能存在的能力差距。
+6. improvedBullets：输出 3-5 条更适合该岗位的简历 bullet。
+7. interviewQuestions：输出 3-5 道贴合岗位的面试题，每题包含 question / intent / answerHint。
+8. 输出内容要适合学生/实习生，不要假设用户有多年工作经验。
+        `.trim(),
+      },
+      {
+        role: "user",
+        content: `请分析下面这个岗位 JD：\n\n${jobDescription.trim()}`,
+      },
+    ];
 
-Candidate:
-Computer science student with React, TypeScript, frontend project, teamwork experience.
-
-Job description:
-${jobDescription}
-          `.trim(),
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
-      ],
-    });
+        body: JSON.stringify({
+          model: modelName,
+          messages,
+          temperature: 0.3,
+        }),
+      }
+    );
 
-    const text = completion.choices[0]?.message?.content;
+    const data = await response.json();
 
-    if (!text || typeof text !== "string") {
+    if (!response.ok) {
+      console.error("OpenRouter Analyze API Error:", data);
       return NextResponse.json(
-        { error: "Model returned empty output." },
-        { status: 500 }
+        {
+          error: data?.error?.message || "OpenRouter 调用失败",
+          details: data,
+        },
+        { status: response.status }
       );
     }
 
-    const jsonText = extractJson(text);
+    const rawText =
+      data?.choices?.[0]?.message?.content?.trim() || "{}";
 
-    if (!jsonText) {
-      return NextResponse.json(
-        { error: "Could not extract JSON from model output.", raw: text },
-        { status: 500 }
-      );
-    }
+    const result = safeParseAnalyzeResult(rawText);
 
-    let parsed: unknown;
-
-    try {
-      parsed = JSON.parse(jsonText);
-    } catch {
-      return NextResponse.json(
-        { error: "Model returned invalid JSON.", raw: text },
-        { status: 500 }
-      );
-    }
-
-    if (!isValidResult(parsed)) {
-      return NextResponse.json(
-        { error: "Model returned unexpected JSON shape.", raw: parsed },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(parsed);
-  } catch (error: any) {
-    console.error("OpenRouter route error:", error);
-
-    const status = error?.status;
-    const message =
-      status === 429
-        ? "免费模型当前请求过多，请过一会儿再试。"
-        : error?.message || "Unknown server error";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Analyze API Error:", error);
+    return NextResponse.json(
+      { error: "服务器内部错误" },
+      { status: 500 }
+    );
   }
 }
