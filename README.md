@@ -38,8 +38,8 @@
     - 下一轮建议
 
 - 💾 **对话持久化**
-  - 使用 localStorage
-  - 刷新页面不丢数据
+   - 使用 localStorage
+   - 刷新页面不丢数据
 
 ---
 
@@ -72,9 +72,11 @@
 ```
 OPENROUTER_API_KEY=your_api_key
 OPENROUTER_MODEL=your_model
+OPENROUTER_VISION_MODEL=your_model
 ```
-- 用API和模型替换掉your_api_key和your_model
-- 例：OPENROUTER_MODEL=openai/gpt-4o-mini
+- 用API和模型替换掉your_***
+- 例：OPENROUTER_MODEL=openai/gpt-4o-mini。
+- 这其中OPENROUTER_MODEL是用来AI聊天面试的，OPENROUTER_VISION_MODEL是在JD分析时用来分析文件的
 
 🚀 启动项目
 ```
@@ -99,22 +101,26 @@ http://localhost:3000
 - 模型：`openai/gpt-4o-mini`
 - 煮啵还是学生，有钱了再换好点的模型，我已经提前预设好环境变量，大家可以自行更改模型，更改模型步骤如下：
 ```
-  修改.env.local文件中的OPENROUTER_MODEL为其它模型即可
+  修改.env.local文件中的OPENROUTER_MODEL和OPENROUTER_VISION_MODEL为其它模型即可
 ```
 ---
 
 ## 🧠 系统架构（核心）
 
 ```text
-用户输入 → JD分析 → 结构化结果
-                ↓
-        注入对话上下文（Context）
-                ↓
-        Chat API（Agent逻辑控制）
-                ↓
-        AI输出（评分 / 面试 / 总结）
-                ↓
-        前端解析 + UI 渲染
+用户输入 / 文件上传
+        ↓
+  文件解析（PDF / OCR / 文本）
+        ↓
+    JD 分析（Analyze API）
+        ↓
+上下文注入（JD + 分析 + 对话）
+        ↓
+    Chat API（Agent控制）
+        ↓
+AI输出（面试 / 评分 / 总结）
+        ↓
+前端解析 + UI 渲染
 ```
 
 ## 📦 项目结构
@@ -125,13 +131,13 @@ src/
 │   ├── api/
 │   │   ├── analyze/route.ts  # JD分析接口
 │   │   └── chat/route.ts     # AI Agent对话接口
+│   │   └── parse-file/route.ts  # ⭐ 文件解析接口
 
 ```
 
 ## 📘 使用教程（教学）
 - 1️⃣ 输入岗位 JD
-- 在左侧输入 Job Description，例如：
-- 负责 React/Next.js 前端开发，熟悉 TypeScript，组件化开发，性能优化...
+- 在左侧输入 Job Description，或上传简历PDF / DOCX / 图片
 - 点击 开始分析。
 
 - 2️⃣ 查看分析结果
@@ -143,14 +149,16 @@ src/
 - AI 将进入面试官模式。
 
 - 4️⃣ 回答问题
+- AI 会持续追问
+- 不会固定题目结束
 
 - 5️⃣ 获取评分与反馈
 - AI 会返回：
-- 优点；不足；评分；改进建议；示例回答
+- 分数；优点；不足；评分；改进建议；示例回答
 
 - 6️⃣ 多轮对话（核心）
 - 继续提问：
-- 我没有实习经历怎么办？----AI 会结合上下文调整策略。
+- 例：我没有实习经历怎么办？----AI 会结合上下文调整策略。
 
 - 7️⃣ 生成总结报告
 - 点击‘生成总结报告’按钮，得到：
@@ -170,14 +178,14 @@ src/
 UI 结构化输出	        ❌	                 ✔
 ```
 ## 📈 后续优化方向
-- 支持上传简历（PDF 解析）
 - 引入 RAG（向量检索）
-- 在线部署（Vercel）
 - 用户系统
 - 面试数据分析
+- 历史会话管理
+- 目前已做vercel部署，但是还没做API限流等操作
 
 ## 👨‍💻 作者
-- 某大学生个人 AI Agent 项目。
+- 某大学生个人 AI Agent 项目。（持续进化中 🚀）
 
 ## ⭐ Star
 - 如果你觉得这个项目不错，欢迎点个 Star ⭐。
